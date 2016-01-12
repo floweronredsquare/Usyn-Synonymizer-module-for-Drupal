@@ -1,0 +1,441 @@
+<?php
+/**
+* @file
+* Allows to make unique your content by substitution of synonyms.
+*
+* On the page creation / editing node adds a tab on which
+* the authenticated user can make the content of the field body
+* unique by substitution of synonyms.
+*/
+
+/**
+* Implements hook_menu()
+*/
+function usyn_synonymizer_menu() {
+  $items['admin/config/usyn_synonymizer'] = [
+    'title' => 'Usyn Synonymizer',
+    'description' => 'Adjust Usyn Synonymizer options.',
+    'position' => 'right',
+    'weight' => -5,
+    'page callback' => 'system_admin_menu_block_page',
+    'access arguments' => ['administer site configuration'],
+    'file' => 'system.admin.inc',
+    'file path' => drupal_get_path('module', 'system'),
+  ];
+  $items['admin/config/usyn_synonymizer/settings'] = array(
+    'title' => 'Usyn Synonymizer settings',
+    'description' => 'Upload a base of synonyms.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('usyn_synonymizer_admin_settings'),
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'usyn_synonymizer.admin.inc',
+  );
+  $items['import-large-csv'] = array(
+    'title' => 'Import CSV',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('usyn_synonymizer_csv_import_form'),
+	'access arguments' => array('administer site configuration'),
+  );
+    $items['node/%node/usyntab'] = array(
+    'title' => 'Usyn',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('usyn_synonymizer_execute_form'),
+	'access arguments' => array('administer site configuration'),
+    'type' => MENU_LOCAL_TASK
+  );
+  $items['clean-db'] = array(
+    'title' => 'Clean the base of synonyms',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('usyn_synonymizer_clean_db_form'),
+	'access arguments' => array('administer site configuration'),
+  );
+  return $items;
+}
+
+/**
+ * Clean DB form
+ */
+function usyn_synonymizer_clean_db_form() {
+  $path = file_create_url('admin/config/usyn_synonymizer/settings');
+  $form['cleandb'] = array(
+    '#type'   => 'item',
+    '#markup' => '<a href="' . $path . '" alt="">' . t('To the base of synonyms upload page') . '</a>',
+  );
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Clean the base of synonyms'),
+  );
+  return $form;
+}
+
+/**
+ * Clean DB form submit
+ */
+function usyn_synonymizer_clean_db_form_submit() {
+  db_truncate('usynbase')->execute();
+  drupal_set_message('Base of synonyms cleared');
+}
+
+$_usyn_synonymizer_npath = variable_get('path_to_file');
+define('USYN_SYNONYMIZER_PATH', $_usyn_synonymizer_npath);
+
+/**
+ * CSV import form.
+ * @param $form
+ * @param $form_state
+ * @return array
+ */
+function usyn_synonymizer_csv_import_form($form, &$form_state) {
+  $form['hidden'] = array(
+    '#type' => 'hidden',
+  );
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Start import'),
+  );
+  if (isset($form_state['storage']['hidden'])) {
+    $form = array();
+  }
+  return $form;
+}
+
+/**
+ * CSV import start.
+ * @param $form_state
+ */
+function usyn_synonymizer_csv_import_form_submit(&$form_state) {
+  $batch = array(
+    'operations' => array(
+      array('usyn_synonymizer_csv_import_operation', array()),
+    ),
+    'finished' => 'batch_example_finished',
+    'title' => t('Processing CSV'),
+    'init_message' => t('CSV Batch is starting.'),
+    'progress_message' => t('Processed @current out of @total.'),
+    'error_message' => t('CSV Batch has encountered an error.'),
+  );
+  batch_set($batch);
+  $form_state['storage']['hidden'] =  '&';
+  $form_state['rebuild'] = TRUE;
+  drupal_set_message('Base synonyms loaded');
+}
+
+/**
+ * CSV operation.
+ * @param $context
+ */
+function usyn_synonymizer_csv_import_operation(&$context) {
+  if (!isset($context['sandbox']['progress'])) {
+    $file = USYN_SYNONYMIZER_PATH;
+    $linecount = 0;
+    $handle = fopen($file, "r");
+    while(!feof($handle)){
+      $line = fgets($handle);
+      $linecount++;
+    }
+    fseek($handle, 0);
+    $context['sandbox']['progress'] = 0;
+    $context['sandbox']['position'] = 0;
+    $context['sandbox']['max'] = $linecount;
+  }
+  $limit = 100;
+  if (!isset($handle)) {
+    $file = USYN_SYNONYMIZER_PATH;
+    $handle = fopen($file, "r");
+    fseek($handle, $context['sandbox']['position']);
+  }
+  $count = 0;
+  while ($data = fgetcsv($handle, 1000, ",")) {
+	$id = db_insert('usynbase')
+    ->fields(array(
+    'word' => $data[0],
+    'syn' => $data[1],
+     ))
+    ->execute();
+    $context['sandbox']['progress']++;
+    $count++;
+    if ($count >= $limit) {
+      break;
+    }
+  }
+  $context['sandbox']['position'] = ftell($handle);
+  if ($context['sandbox']['progress'] != $context['sandbox']['max']) {
+    $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
+  }
+}
+
+/**
+ * Text synonymization form
+ * @param $form
+ * @param $form_state
+ * @return
+ */
+function usyn_synonymizer_execute_form($form, &$form_state) {
+  $nid = arg(1);
+  $node = node_load($nid);
+  $rez = field_get_items('node', $node, 'body');
+  $form['#attached']['css'] = array(
+    drupal_get_path('module', 'usyn_synonymizer') . '/usyn.css',
+  );
+  $form['#attached']['js'] = array(
+    drupal_get_path('module', 'usyn_synonymizer') . '/usyn.js',
+  );
+  $form['stopwords'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Stopwords'),
+  );
+  $form['input_text'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Input Text'),
+    '#default_value' => strip_tags($rez[0]['value'], '<p>'),
+  );
+  $form['char_count'] = array(
+    '#type'   => 'item',
+    '#prefix' => '<span style="font-weight: bold;">' . t('Characters: ') . '</span>',
+    '#markup' => 'x',
+  );
+  $form['submit_one'] = array(
+    '#type' => 'submit',
+    '#value' => t('Synonymize!'),
+	'#submit' => array('usyn_synonymizer_execute_form_submit_one'),
+  );
+  if (isset($form_state['storage']['input_text']) && ($form_state['storage']['stopwords'])) {
+    $input = $form_state['storage']['input_text'];
+    $stopwords = $form_state['storage']['stopwords'];
+	$synonym = $form_state['storage']['synonym'];
+	$out1 = $form_state['storage']['out1'];
+    $out2 = $form_state['storage']['out2'];
+    $form = array();
+    $form['#attached']['css'] = array(
+    drupal_get_path('module', 'usyn_synonymizer') . '/usyn.css',
+    );
+    $form['#attached']['js'] = array(
+      drupal_get_path('module', 'usyn_synonymizer') . '/usyn.js',
+    );
+    $form['stopwords'] = array(
+      '#type'   => 'textfield',
+	  '#title' => t('Stopwords'),
+      '#default_value' => $stopwords,
+    );
+    $form['input_text'] = array(
+      '#type'   => 'textarea',
+	  '#title' => t('Input Text'),
+      '#default_value' => $input,
+    );
+    $form['char_count'] = array(
+      '#type'   => 'item',
+      '#prefix' => '<span style="font-weight: bold;">' . t('Characters: ') . '</span>',
+      '#markup' => 'x',
+    );
+    $form['change'] = array(
+      '#type'   => 'item',
+      '#prefix' => '<span style="font-weight: bold;">' . t('Substitutions: ') . '</span>',
+      '#markup' => 'x',
+    );
+    $form['out1'] = array(
+      '#type'   => 'item',
+      '#title' => 'Result',
+      '#markup' => $out1,
+    );
+    $form['out2'] = array(
+      '#type'   => 'item',
+      '#markup' => $out2,
+    );
+    $form['synonym'] = array(
+      '#type'   => 'textarea',
+      '#default_value' => $synonym,
+    );
+    $form['submit_two'] = array(
+      '#type' => 'submit',
+      '#value' => t('Save results'),
+	  '#submit' => array('usyn_synonymizer_execute_form_submit_two'),
+    );
+  }
+  return $form;  
+}
+
+/**
+ * Form validation handler
+ * @param $form_state
+ */
+function usyn_synonymizer_execute_form_validate(&$form_state) {
+  if (empty($form_state['values']['input_text'])) {
+    form_set_error('name', t('You don`t input text. Sad. Please retry.'));
+  }
+  if (empty($form_state['values']['stopwords'])) {
+    $form_state['values']['stopwords'] = ",";
+  }
+}
+
+/**
+ * Text synonymization form submit
+ * @param $form_state
+ */
+function usyn_synonymizer_execute_form_submit_one(&$form_state) {
+  $max_char = 10000;
+  $val1 = $form_state['values']['input_text'];
+  $val2 = $form_state['values']['stopwords'];
+  $t = trim($val1);
+  $stopwords = trim($val2);
+
+  $len = strlen($t);
+  if ($len > $max_char) $t = "";
+  $t = stripslashes($t);
+  $t = htmlspecialchars($t);
+  $t = str_replace("\n", "<br>", $t);
+  $t = str_replace("|||", "|", $t);
+	
+  db_query('OPTIMIZE TABLE {usynbase}');
+
+  $t = usyn_synonymizer_rewrite($t, $stopwords);	
+		
+  $res = $t."|||";
+		
+  $out1 = '<table width="100%" border="0" align="center" cellpadding="0" cellspacing="0" id="table1" class="Text3" style="position: relative; border: 1px solid #777777;"><tr><td height="38" align="left" valign="top" bgcolor="#FFFFFF" id="out" style="border: 1px solid #CCCCCC; line-height:18px;">&nbsp;</td></tr></table>';
+	
+  $out2 = '<div><table class="Text3" bgcolor="#FFFFFF" cellpadding="2" cellspacing="2" border="0" id="select_syn" style="position: relative; left:0; top:0; background: #fff; width: 10px; padding: 5px; font-size:14px; cursor:pointer; display:none;"><tbody class="scrollContent"></tbody></table></div>';
+
+  $form_state['storage']['input_text'] = $form_state['values']['input_text'];
+  $form_state['storage']['stopwords'] = $form_state['values']['stopwords'];
+  $form_state['storage']['synonym'] = $res;
+  $form_state['storage']['out1'] = $out1;
+  $form_state['storage']['out2'] = $out2;	
+  $form_state['rebuild'] = TRUE;
+}
+
+/**
+ * Replacement function
+ * @param $text
+ * @param $stopwords
+ * @return string
+ */
+function usyn_synonymizer_rewrite($text, $stopwords) {
+  $text = trim($text);
+  $stopwords = trim($stopwords);
+  $stopwords = explode(",", $stopwords);
+  $len = count($stopwords);
+  for ($i=0; $i<$len; $i++) {
+    $stopwords[$i] = trim($stopwords[$i]);
+  }
+
+  $n = 0;
+  $count = 0;
+  $new_text = "";
+	
+  $len = strlen($text);
+  $w_c = 0;
+  $words[$w_c] = "";
+	
+  for ($i=0; $i<$len; $i++) {
+    if ( ($text[$i]==" ") or ($text[$i]==",") or ($text[$i]==".") or
+    ($text[$i]=="!") or ($text[$i]=="?") or ($text[$i]==chr(13)) or
+    ($text[$i]=="(") or ($text[$i]==")") or ($text[$i]==":") or
+    ($text[$i]==";") or ($text[$i]=="«") or ($text[$i]=="»") or
+    ($text[$i]=="-") or ($text[$i]=="=") or ($text[$i]=="'") ) {
+      $w_c++;
+      $words[$w_c] = $text[$i];
+    }
+    else {
+      if ($i>0 && (($text[$i-1]==" ") or ($text[$i-1]==",") or ($text[$i-1]==".") or
+      ($text[$i-1]=="!") or ($text[$i-1]=="?") or ($text[$i-1]==chr(13)) or
+      ($text[$i-1]=="(") or ($text[$i-1]==")") or ($text[$i-1]==":") or
+      ($text[$i-1]==";") or ($text[$i-1]=="«") or ($text[$i-1]=="»") or
+      ($text[$i-1]=="-") or ($text[$i-1]=="=") or ($text[$i-1]=="'"))) {
+        $w_c++;
+        $words[$w_c] = "";
+      }
+      $words[$w_c] = $words[$w_c].$text[$i];
+    }	
+  }
+	
+  for ($i=0; $i<=$w_c; $i++) {
+    if ((strlen($words[$i])>1) &&
+      (!in_array($words[$i], $stopwords)) &&
+      (($words[$i]!=" ") and ($words[$i]!=",") and ($words[$i]!=".") and
+       ($words[$i]!="!") and ($words[$i]!="?") and ($words[$i]!=chr(13)) and
+       ($words[$i]!="(") and ($words[$i]!=")") and ($words[$i]!=":") and
+       ($words[$i]!=";") and ($words[$i]!="«") and ($words[$i]!="»") and
+       ($words[$i]!="-") and ($words[$i]!="=") and ($words[$i]!="'"))) {
+         $res = db_query('SELECT syn FROM {usynbase} WHERE word=:word', array(':word' => $words[$i]))->fetchCol();
+      $rows = db_query('SELECT syn FROM {usynbase} WHERE word=:word', array(':word' => $words[$i]))->rowCount();
+      if ($rows > 0) {	
+        $n++;
+        $count++;
+        $dop[$n] = $n."|".$words[$i]."|"."0"."|";			
+				
+        $BigChar = false;
+        $BigStr = false;
+        if ($words[$i] == strtoupper($words[$i])) {
+          $BigStr = true;
+        }
+        else {
+          if ($words[$i][0] == strtoupper($words[$i][0])) {
+            $BigChar = true;
+          }
+        }
+			
+        $row[0] = trim($res[0]);
+        $ss = explode("|", $row[0]);
+				
+        unset($syn_a);
+        $id = -1;
+				
+        $ss_c = count($ss);
+        for ($j=1; $j<$ss_c+1; $j+=2) {	
+          $id++;
+          $syn_a[$id] = $ss[$j-1];
+          if ($BigChar) {
+            $syn_a[$id][0] = strtoupper($syn_a[$id][0]);
+          }
+          if ($BigStr) {
+            $syn_a[$id] = strtoupper($syn_a[$id]);				
+          }
+          
+		  $syn_b[$id] = $ss[$j];
+        }		  
+				
+        if ($syn_b[0] > 0) {
+          $syn = $syn_a[0];
+        }
+        else {
+          $syn = $syn_a[array_rand($syn_a)];		
+        }
+			  
+        $words[$i] = "<a id='".$n."' class='zam'>".$syn."</a>";
+			
+        for ($j=0; $j<=$id; $j++) {
+          $count++;
+          if ($syn_a[$j]==$syn) {
+            $dop[$n] = $dop[$n].$n."|".$syn_a[$j]."|1|";
+          }
+          else {
+            $dop[$n] = $dop[$n].$n."|".$syn_a[$j]."|0|";
+          }
+        }
+      }
+    }
+  }
+		
+    $new_text = implode($words);
+
+    if ($count == 0) {
+      $dop[0] = "_|";
+    }
+    $new_text = $count."|||".implode($dop)."||".$new_text;
+    return $new_text;
+}
+
+/**
+ * Save results
+ * @param $form_state
+ */
+function usyn_synonymizer_execute_form_submit_two(&$form_state) {
+  $nid = arg(1);
+  $path = 'node/'. $nid .'/edit';
+  $node = node_load($nid);
+  $val = $form_state['values']['input_text'];
+  $node->body[LANGUAGE_NONE][0]['value'] = $val;
+  field_attach_update('node', $node);
+  $form_state['redirect'] = $path;
+}

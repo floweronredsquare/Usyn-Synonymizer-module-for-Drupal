@@ -1,0 +1,118 @@
+# $Id$
+#
+# Russian translation of Drupal (general)
+# Copyright YEAR NAME <EMAIL@ADDRESS>
+# Generated from files:
+#  usyn_synonymizer.admin.inc: n/a
+#  usyn_synonymizer.module: n/a
+#  usyn_synonymizer.info: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"POT-Creation-Date: 2015-12-25 00:59+0400\n"
+"PO-Revision-Date: 2015-12-25 01:00+0400\n"
+"Language-Team: Russian <EMAIL@ADDRESS>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"X-Generator: Poedit 1.8.6\n"
+"Last-Translator: \n"
+"Language: ru\n"
+
+#: usyn_synonymizer.admin.inc:14
+msgid "To the page cleaning base of synonyms"
+msgstr "На страницу очистки базы синонимов"
+
+#: usyn_synonymizer.admin.inc:18
+msgid "Base of synonyms"
+msgstr "База синонимов"
+
+#: usyn_synonymizer.admin.inc:19
+msgid "CSV files only."
+msgstr "CSV-файлы только."
+
+#: usyn_synonymizer.module:63
+msgid "To the base of synonyms upload page"
+msgstr "На страницу загрузки базы синонимов"
+
+#: usyn_synonymizer.module:67;48
+msgid "Clean the base of synonyms"
+msgstr "Очистить базу синонимов"
+
+#: usyn_synonymizer.module:92
+msgid "Start import"
+msgstr "Начать импорт"
+
+#: usyn_synonymizer.module:109
+msgid "Processing CSV"
+msgstr "Обработка CSV"
+
+#: usyn_synonymizer.module:110
+msgid "CSV Batch is starting."
+msgstr "Обработка CSV начата"
+
+#: usyn_synonymizer.module:111
+msgid "Processed @current out of @total."
+msgstr "Обработано @current из @total."
+
+#: usyn_synonymizer.module:112
+msgid "CSV Batch has encountered an error."
+msgstr "Обнаружена ошибка при обработке CSV"
+
+#: usyn_synonymizer.module:178;210
+msgid "Stopwords"
+msgstr "Стоп-слова"
+
+#: usyn_synonymizer.module:182;215
+msgid "Input Text"
+msgstr "Исходный текст"
+
+#: usyn_synonymizer.module:187;220
+msgid "Characters: "
+msgstr "Символов: "
+
+#: usyn_synonymizer.module:192
+msgid "Synonymize!"
+msgstr "Уникализировать!"
+
+#: usyn_synonymizer.module:225
+msgid "Substitutions: "
+msgstr "Замен: "
+
+#: usyn_synonymizer.module:243
+msgid "Save results"
+msgstr "Сохранить результат"
+
+#: usyn_synonymizer.module:256
+msgid "You don`t input text. Sad. Please retry."
+msgstr "Вы забыли ввести текст. Пожалуйста, повторите попытку."
+
+#: usyn_synonymizer.module:16 usyn_synonymizer.info:0
+msgid "Usyn Synonymizer"
+msgstr ""
+
+#: usyn_synonymizer.module:17
+msgid "Adjust Usyn Synonymizer options."
+msgstr "Настройки синонимайзера"
+
+#: usyn_synonymizer.module:26
+msgid "Usyn Synonymizer settings"
+msgstr "Настройки синонимайзера"
+
+#: usyn_synonymizer.module:27
+msgid "Upload a base of synonyms."
+msgstr "Загрузить базу синонимов"
+
+#: usyn_synonymizer.module:35
+msgid "Import CSV"
+msgstr "Импорт CSV"
+
+#: usyn_synonymizer.module:41
+msgid "Usyn"
+msgstr ""
+
+#: usyn_synonymizer.info:0
+msgid "Allows to make unique your content by substitution of synonyms."
+msgstr "Позволяет уникализировать контент путем замены слов синонимами."

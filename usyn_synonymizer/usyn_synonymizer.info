@@ -1,0 +1,7 @@
+name = Usyn Synonymizer
+description = "Allows to make unique your content by substitution of synonyms."
+core = 7.x
+files[] = usyn_synonymizer.module
+files[] = usyn_synonymizer.admin.inc
+files[] = usyn_synonymizer.install
+configure=admin/config/usyn_synonymizer/settings

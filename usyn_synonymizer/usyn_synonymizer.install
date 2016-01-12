@@ -1,0 +1,35 @@
+<?php
+
+/**
+ * Implements hook_menu().
+ */
+function usyn_synonymizer_schema() {
+  $schema['usynbase'] = array(
+    'description' => 'TODO: please describe this table!',
+    'fields' => array(
+      'word' => array(
+      'description' => 'TODO: please describe this field!',
+      'type' => 'varchar',
+      'length' => '255',
+      'not null' => TRUE,
+      ),
+      'syn' => array(
+        'description' => 'TODO: please describe this field!',
+        'type' => 'varchar',
+        'length' => '1000',
+        'not null' => TRUE,
+      ),
+    ),
+    'indexes' => array(
+    'word' => array('word'),
+    ),
+  );
+  return $schema;
+}
+
+/**
+* Uninstall module
+*/
+function usyn_synonymizer_uninstall() {
+  drupal_uninstall_schema('usynbase');
+}
