@@ -60,6 +60,8 @@ If you work with Usyn Synonymizer the first time you need to upload a base of sy
 
 2. Загрузить новую базу синонимов можно на странице http://<your_site>/admin/config/usyn_synonymizer/settings
 
+3. После загрузки CSV файла вам потребуется осуществить импорт базы в систему. Для этого нажмите кнопку "Import" на странице, на которую вы попадете после загрузки файла с базой синонимов.
+
 
 ### Уникализация контента
 
