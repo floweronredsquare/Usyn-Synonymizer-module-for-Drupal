@@ -12,16 +12,16 @@
 * Implements hook_menu()
 */
 function usyn_synonymizer_menu() {
-  $items['admin/config/usyn_synonymizer'] = [
+  $items['admin/config/usyn_synonymizer'] = array(
     'title' => 'Usyn Synonymizer',
     'description' => 'Adjust Usyn Synonymizer options.',
     'position' => 'right',
     'weight' => -5,
     'page callback' => 'system_admin_menu_block_page',
-    'access arguments' => ['administer site configuration'],
+    'access arguments' => array('administer site configuration'),
     'file' => 'system.admin.inc',
     'file path' => drupal_get_path('module', 'system'),
-  ];
+  );
   $items['admin/config/usyn_synonymizer/settings'] = array(
     'title' => 'Usyn Synonymizer settings',
     'description' => 'Upload a base of synonyms.',
@@ -72,19 +72,16 @@ function usyn_synonymizer_clean_db_form() {
 /**
  * Clean DB form submit
  */
-function usyn_synonymizer_clean_db_form_submit() {
+function usyn_synonymizer_clean_db_form_submit($form, &$form_state) {
   db_truncate('usynbase')->execute();
   drupal_set_message('Base of synonyms cleared');
 }
 
 $_usyn_synonymizer_npath = variable_get('path_to_file');
 define('USYN_SYNONYMIZER_PATH', $_usyn_synonymizer_npath);
-
+ 
 /**
  * CSV import form.
- * @param $form
- * @param $form_state
- * @return array
  */
 function usyn_synonymizer_csv_import_form($form, &$form_state) {
   $form['hidden'] = array(
@@ -99,12 +96,11 @@ function usyn_synonymizer_csv_import_form($form, &$form_state) {
   }
   return $form;
 }
-
+ 
 /**
  * CSV import start.
- * @param $form_state
  */
-function usyn_synonymizer_csv_import_form_submit(&$form_state) {
+function usyn_synonymizer_csv_import_form_submit($form, &$form_state) {
   $batch = array(
     'operations' => array(
       array('usyn_synonymizer_csv_import_operation', array()),
@@ -120,10 +116,9 @@ function usyn_synonymizer_csv_import_form_submit(&$form_state) {
   $form_state['rebuild'] = TRUE;
   drupal_set_message('Base synonyms loaded');
 }
-
+ 
 /**
  * CSV operation.
- * @param $context
  */
 function usyn_synonymizer_csv_import_operation(&$context) {
   if (!isset($context['sandbox']['progress'])) {
@@ -167,10 +162,7 @@ function usyn_synonymizer_csv_import_operation(&$context) {
 
 /**
  * Text synonymization form
- * @param $form
- * @param $form_state
- * @return
- */
+ **/
 function usyn_synonymizer_execute_form($form, &$form_state) {
   $nid = arg(1);
   $node = node_load($nid);
@@ -257,9 +249,9 @@ function usyn_synonymizer_execute_form($form, &$form_state) {
 
 /**
  * Form validation handler
- * @param $form_state
+ *
  */
-function usyn_synonymizer_execute_form_validate(&$form_state) {
+function usyn_synonymizer_execute_form_validate($form, &$form_state) {
   if (empty($form_state['values']['input_text'])) {
     form_set_error('name', t('You don`t input text. Sad. Please retry.'));
   }
@@ -270,9 +262,8 @@ function usyn_synonymizer_execute_form_validate(&$form_state) {
 
 /**
  * Text synonymization form submit
- * @param $form_state
- */
-function usyn_synonymizer_execute_form_submit_one(&$form_state) {
+ **/
+function usyn_synonymizer_execute_form_submit_one($form, &$form_state) {
   $max_char = 10000;
   $val1 = $form_state['values']['input_text'];
   $val2 = $form_state['values']['stopwords'];
@@ -292,9 +283,9 @@ function usyn_synonymizer_execute_form_submit_one(&$form_state) {
 		
   $res = $t."|||";
 		
-  $out1 = '<table width="100%" border="0" align="center" cellpadding="0" cellspacing="0" id="table1" class="Text3" style="position: relative; border: 1px solid #777777;"><tr><td height="38" align="left" valign="top" bgcolor="#FFFFFF" id="out" style="border: 1px solid #CCCCCC; line-height:18px;">&nbsp;</td></tr></table>';
+  $out1 = '<table id="table1" class="Text3"><tr><td id="out">&nbsp;</td></tr></table>';
 	
-  $out2 = '<div><table class="Text3" bgcolor="#FFFFFF" cellpadding="2" cellspacing="2" border="0" id="select_syn" style="position: relative; left:0; top:0; background: #fff; width: 10px; padding: 5px; font-size:14px; cursor:pointer; display:none;"><tbody class="scrollContent"></tbody></table></div>';
+  $out2 = '<div><table class="Text4" id="select_syn"><tbody class="scrollContent"></tbody></table></div>';
 
   $form_state['storage']['input_text'] = $form_state['values']['input_text'];
   $form_state['storage']['stopwords'] = $form_state['values']['stopwords'];
@@ -306,10 +297,7 @@ function usyn_synonymizer_execute_form_submit_one(&$form_state) {
 
 /**
  * Replacement function
- * @param $text
- * @param $stopwords
- * @return string
- */
+ **/
 function usyn_synonymizer_rewrite($text, $stopwords) {
   $text = trim($text);
   $stopwords = trim($stopwords);
@@ -428,9 +416,8 @@ function usyn_synonymizer_rewrite($text, $stopwords) {
 
 /**
  * Save results
- * @param $form_state
- */
-function usyn_synonymizer_execute_form_submit_two(&$form_state) {
+ **/
+function usyn_synonymizer_execute_form_submit_two($form, &$form_state) {
   $nid = arg(1);
   $path = 'node/'. $nid .'/edit';
   $node = node_load($nid);

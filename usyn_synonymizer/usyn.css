@@ -1,16 +1,50 @@
 #edit-output-text {
-cursor:pointer; 
+  cursor:pointer; 
 }
 .form-item-synonym  {
-display: none;	
+  display: none;	
 }
 .zam
 {
-	cursor:pointer; 
-	background:#DDFFDD;
+  cursor:pointer; 
+  background:#ddffdd;
+  border: 1px solid #CCCCCC;
+  line-height:18px;
+  height: 38px;
 }
 .Text3
 {
-	font-size:14px;
-	color:#000000;
+  font-size:14px;
+  color:#000;
 }
+.Text3 table {
+  position: relative;
+  width: 100%;
+  border: 1px solid #777;
+  text-align: center;
+  border-spacing: 0;
+}
+.out td {
+  text-align: left;
+  vertical-align: top;
+  background: #fff;
+  
+}
+.Text4
+{
+  font-size:14px;
+  color:#000; 
+}
+.Text4 table {
+  position: relative;
+  left:0;
+  top:0;
+  background: #fff;
+  width: 10px;
+  padding: 5px;
+  font-size:14px;
+  cursor:pointer;
+  display:none;
+  border: none;
+  border-spacing: 2px;
+|
