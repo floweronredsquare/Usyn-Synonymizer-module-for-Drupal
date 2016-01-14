@@ -12,6 +12,7 @@
 * Implements hook_menu()
 */
 function usyn_synonymizer_menu() {
+  // Add the Usyn Synonymizer point to Configuration
   $items['admin/config/usyn_synonymizer'] = array(
     'title' => 'Usyn Synonymizer',
     'description' => 'Adjust Usyn Synonymizer options.',
@@ -22,6 +23,7 @@ function usyn_synonymizer_menu() {
     'file' => 'system.admin.inc',
     'file path' => drupal_get_path('module', 'system'),
   );
+  // Add the settings page to Configuration
   $items['admin/config/usyn_synonymizer/settings'] = array(
     'title' => 'Usyn Synonymizer settings',
     'description' => 'Upload a base of synonyms.',
@@ -31,12 +33,14 @@ function usyn_synonymizer_menu() {
     'type' => MENU_NORMAL_ITEM,
     'file' => 'usyn_synonymizer.admin.inc',
   );
+  // Add the Import CSV file page
   $items['import-large-csv'] = array(
     'title' => 'Import CSV',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('usyn_synonymizer_csv_import_form'),
     'access arguments' => array('administer site configuration'),
   );
+  // Add the Usyn tab on the node page
     $items['node/%node/usyntab'] = array(
     'title' => 'Usyn',
     'page callback' => 'drupal_get_form',
@@ -44,6 +48,7 @@ function usyn_synonymizer_menu() {
     'access arguments' => array('administer site configuration'),
     'type' => MENU_LOCAL_TASK
   );
+  // Add a page for clean the base of synonyms
   $items['clean-db'] = array(
     'title' => 'Clean the base of synonyms',
     'page callback' => 'drupal_get_form',
@@ -119,6 +124,8 @@ function usyn_synonymizer_csv_import_form_submit($form, &$form_state) {
  
 /**
  * CSV operation.
+ *
+ * Makes database lines from CSV file lines
  */
 function usyn_synonymizer_csv_import_operation(&$context) {
   if (!isset($context['sandbox']['progress'])) {
@@ -167,6 +174,7 @@ function usyn_synonymizer_execute_form($form, &$form_state) {
   $nid = arg(1);
   $node = node_load($nid);
   $rez = field_get_items('node', $node, 'body');
+  // Include css and js files
   $form['#attached']['css'] = array(
     drupal_get_path('module', 'usyn_synonymizer') . '/usyn.css',
   );
@@ -192,6 +200,7 @@ function usyn_synonymizer_execute_form($form, &$form_state) {
     '#value' => t('Synonymize!'),
     '#submit' => array('usyn_synonymizer_execute_form_submit_one'),
   );
+  // Checks if the fields are not empty
   if (isset($form_state['storage']['input_text']) && ($form_state['storage']['stopwords'])) {
     $input = $form_state['storage']['input_text'];
     $stopwords = $form_state['storage']['stopwords'];
@@ -205,6 +214,7 @@ function usyn_synonymizer_execute_form($form, &$form_state) {
     $form['#attached']['js'] = array(
       drupal_get_path('module', 'usyn_synonymizer') . '/usyn.js',
     );
+    // Inserts existing values
     $form['stopwords'] = array(
       '#type' => 'textfield',
       '#title' => t('Stopwords'),
@@ -220,6 +230,7 @@ function usyn_synonymizer_execute_form($form, &$form_state) {
       '#prefix' => '<span style="font-weight: bold;">' . t('Characters:') . '&nbsp;</span>',
       '#markup' => 'x',
     );
+    // New field for changes count
     $form['change'] = array(
       '#type' => 'item',
       '#prefix' => '<span style="font-weight: bold;">' . t('Substitutions:') . '&nbsp;</span>',
@@ -265,6 +276,7 @@ function usyn_synonymizer_execute_form_validate($form, &$form_state) {
  **/
 function usyn_synonymizer_execute_form_submit_one($form, &$form_state) {
   $max_char = 10000;
+  // Get input values
   $val1 = $form_state['values']['input_text'];
   $val2 = $form_state['values']['stopwords'];
   $t = trim($val1);
@@ -279,6 +291,7 @@ function usyn_synonymizer_execute_form_submit_one($form, &$form_state) {
 
   db_query('OPTIMIZE TABLE {usynbase}');
 
+  // Processing of input values
   $t = usyn_synonymizer_rewrite($t, $stopwords);	
 
   $res = $t . "|||";
@@ -287,6 +300,7 @@ function usyn_synonymizer_execute_form_submit_one($form, &$form_state) {
 
   $out2 = '<div><table class="Text4" id="select_syn"><tbody class="scrollContent"></tbody></table></div>';
 
+  // Remember the results to show after form rebuilt
   $form_state['storage']['input_text'] = $form_state['values']['input_text'];
   $form_state['storage']['stopwords'] = $form_state['values']['stopwords'];
   $form_state['storage']['synonym'] = $res;
@@ -299,6 +313,7 @@ function usyn_synonymizer_execute_form_submit_one($form, &$form_state) {
  * Replacement function
  **/
 function usyn_synonymizer_rewrite($text, $stopwords) {
+  //Getting input data
   $text = trim($text);
   $stopwords = trim($stopwords);
   $stopwords = explode(",", $stopwords);
@@ -354,6 +369,7 @@ function usyn_synonymizer_rewrite($text, $stopwords) {
     $is_15 = (($words[$i] != "-") && ($words[$i] != "=") && ($words[$i] != "'"));
     // Delete incorrect symbols, stopwords and find synonyms in database
     if ((strlen($words[$i])>1) && (!in_array($words[$i], $stopwords)) && ($is_11 && $is_12 && $is_13 && $is_14 && $is_15)) {
+      // Get synonyms from database
       $res = db_query('SELECT syn FROM {usynbase} WHERE word=:word', array(':word' => $words[$i]))->fetchCol();
       $rows = db_query('SELECT syn FROM {usynbase} WHERE word=:word', array(':word' => $words[$i]))->rowCount();
       if ($rows > 0) {	
