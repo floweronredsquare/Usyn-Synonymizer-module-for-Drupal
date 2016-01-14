@@ -8,16 +8,16 @@
  */
 function usyn_synonymizer_schema() {
   $schema['usynbase'] = array(
-    'description' => 'TODO: please describe this table!',
+    'description' => 'Synonyms base for usyn_synonymizer module',
     'fields' => array(
       'word' => array(
-      'description' => 'TODO: please describe this field!',
+      'description' => 'Words',
       'type' => 'varchar',
       'length' => '255',
       'not null' => TRUE,
       ),
       'syn' => array(
-        'description' => 'TODO: please describe this field!',
+        'description' => 'Synonyms',
         'type' => 'varchar',
         'length' => '1000',
         'not null' => TRUE,
