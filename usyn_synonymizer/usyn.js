@@ -3,7 +3,7 @@
     m_syn = new Array();
     m_sel = new Array();
 
-    function SetMas(t)
+    function setmas(t)
     {
         m_syn.length = 0;
         m_sel.length = 0;
@@ -46,7 +46,7 @@
         return m1[2];
     }
 
-    function TrClick(z_n, syn_n)
+    function trclick(z_n, syn_n)
     { 			 
         for (var i=0; i<m_sel[z_n].length; i++)
         {
@@ -61,7 +61,7 @@
         syn_list_close();
     }
 
-    function CheckLength()
+    function checklength()
     {
         var len = document.getElementById('edit-input-text').value.length; 
         document.getElementById('edit-char-count').innerHTML = len;
@@ -75,7 +75,7 @@
             document.getElementById('edit-char-count').style.color = "#000000";	
         }
     }
-    setInterval(CheckLength, 500)
+    setInterval(checklength, 500)
 	
     function delrows(tableId)
     {
@@ -96,7 +96,7 @@
         cell.innerHTML = text;
         cell.id = id;
         cell.height = 25;
-        cell.onclick = function() { TrClick(syn, id); }
+        cell.onclick = function() { trclick(syn, id); }
         cell.onmousemove = function() { cell.style.background = "#FFDDDD"; }
         cell.onmouseout = function() { if ( (m_sel[syn][id]==1) ) cell.style.background = "#DDFFDD"; else   cell.style.background = "#F3F8F3"; }
         cell.align = "center";
@@ -114,7 +114,7 @@
             syn_list_close();
 	
             var data = document.getElementById('edit-synonym').value;
-            document.getElementById('out').innerHTML = SetMas(data);
+            document.getElementById('out').innerHTML = setmas(data);
 	
             $('.zam').bind('click', function(){	
             var x=0, y=0;

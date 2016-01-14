@@ -1,5 +1,8 @@
 <?php
-
+/**
+ * @file
+ * Install, update, and uninstall functions for the Usyn_Synonymizer module.
+ */
 /**
  * Implements hook_menu().
  */

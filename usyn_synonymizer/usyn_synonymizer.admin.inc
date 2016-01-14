@@ -48,7 +48,7 @@ function usyn_synonymizer_admin_settings_submit($form, &$form_state) {
   $file = $form_state['values']['file'];
   $file->status = FILE_STATUS_PERMANENT;
   file_save($file);
-  drupal_set_message('File was downloaded');
+  drupal_set_message(t('File was downloaded'));
   $path = str_replace('public:/', variable_get('file_public_path', 'sites/default/files'), $file->uri);
   variable_set('path_to_file', $path);
   $form_state['redirect'] = 'import-large-csv';

@@ -3,7 +3,7 @@
 * @file
 * Allows to make unique your content by substitution of synonyms.
 *
-* On the page creation / editing node adds a tab on which
+* On the page editing node adds a tab on which
 * the authenticated user can make the content of the field body
 * unique by substitution of synonyms.
 */
@@ -35,20 +35,20 @@ function usyn_synonymizer_menu() {
     'title' => 'Import CSV',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('usyn_synonymizer_csv_import_form'),
-	'access arguments' => array('administer site configuration'),
+    'access arguments' => array('administer site configuration'),
   );
     $items['node/%node/usyntab'] = array(
     'title' => 'Usyn',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('usyn_synonymizer_execute_form'),
-	'access arguments' => array('administer site configuration'),
+    'access arguments' => array('administer site configuration'),
     'type' => MENU_LOCAL_TASK
   );
   $items['clean-db'] = array(
     'title' => 'Clean the base of synonyms',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('usyn_synonymizer_clean_db_form'),
-	'access arguments' => array('administer site configuration'),
+    'access arguments' => array('administer site configuration'),
   );
   return $items;
 }
@@ -74,7 +74,7 @@ function usyn_synonymizer_clean_db_form() {
  */
 function usyn_synonymizer_clean_db_form_submit($form, &$form_state) {
   db_truncate('usynbase')->execute();
-  drupal_set_message('Base of synonyms cleared');
+  drupal_set_message(t('Base of synonyms cleared'));
 }
 
 $_usyn_synonymizer_npath = variable_get('path_to_file');
@@ -114,7 +114,7 @@ function usyn_synonymizer_csv_import_form_submit($form, &$form_state) {
   batch_set($batch);
   $form_state['storage']['hidden'] =  '&';
   $form_state['rebuild'] = TRUE;
-  drupal_set_message('Base synonyms loaded');
+  drupal_set_message(t('Base synonyms loaded'));
 }
  
 /**
@@ -125,7 +125,7 @@ function usyn_synonymizer_csv_import_operation(&$context) {
     $file = USYN_SYNONYMIZER_PATH;
     $linecount = 0;
     $handle = fopen($file, "r");
-    while(!feof($handle)){
+    while (!feof($handle)) {
       $line = fgets($handle);
       $linecount++;
     }
@@ -142,7 +142,7 @@ function usyn_synonymizer_csv_import_operation(&$context) {
   }
   $count = 0;
   while ($data = fgetcsv($handle, 1000, ",")) {
-	$id = db_insert('usynbase')
+    $id = db_insert('usynbase')
     ->fields(array(
     'word' => $data[0],
     'syn' => $data[1],
@@ -184,19 +184,19 @@ function usyn_synonymizer_execute_form($form, &$form_state) {
   );
   $form['char_count'] = array(
     '#type'   => 'item',
-    '#prefix' => '<span style="font-weight: bold;">' . t('Characters: ') . '</span>',
+    '#prefix' => '<span style="font-weight: bold;">' . t('Characters:') . '&nbsp;</span>',
     '#markup' => 'x',
   );
   $form['submit_one'] = array(
     '#type' => 'submit',
     '#value' => t('Synonymize!'),
-	'#submit' => array('usyn_synonymizer_execute_form_submit_one'),
+    '#submit' => array('usyn_synonymizer_execute_form_submit_one'),
   );
   if (isset($form_state['storage']['input_text']) && ($form_state['storage']['stopwords'])) {
     $input = $form_state['storage']['input_text'];
     $stopwords = $form_state['storage']['stopwords'];
-	$synonym = $form_state['storage']['synonym'];
-	$out1 = $form_state['storage']['out1'];
+    $synonym = $form_state['storage']['synonym'];
+    $out1 = $form_state['storage']['out1'];
     $out2 = $form_state['storage']['out2'];
     $form = array();
     $form['#attached']['css'] = array(
@@ -206,42 +206,42 @@ function usyn_synonymizer_execute_form($form, &$form_state) {
       drupal_get_path('module', 'usyn_synonymizer') . '/usyn.js',
     );
     $form['stopwords'] = array(
-      '#type'   => 'textfield',
-	  '#title' => t('Stopwords'),
+      '#type' => 'textfield',
+      '#title' => t('Stopwords'),
       '#default_value' => $stopwords,
     );
     $form['input_text'] = array(
-      '#type'   => 'textarea',
-	  '#title' => t('Input Text'),
+      '#type' => 'textarea',
+      '#title' => t('Input Text'),
       '#default_value' => $input,
     );
     $form['char_count'] = array(
-      '#type'   => 'item',
-      '#prefix' => '<span style="font-weight: bold;">' . t('Characters: ') . '</span>',
+      '#type' => 'item',
+      '#prefix' => '<span style="font-weight: bold;">' . t('Characters:') . '&nbsp;</span>',
       '#markup' => 'x',
     );
     $form['change'] = array(
-      '#type'   => 'item',
-      '#prefix' => '<span style="font-weight: bold;">' . t('Substitutions: ') . '</span>',
+      '#type' => 'item',
+      '#prefix' => '<span style="font-weight: bold;">' . t('Substitutions:') . '&nbsp;</span>',
       '#markup' => 'x',
     );
     $form['out1'] = array(
-      '#type'   => 'item',
+      '#type' => 'item',
       '#title' => 'Result',
       '#markup' => $out1,
     );
     $form['out2'] = array(
-      '#type'   => 'item',
+      '#type' => 'item',
       '#markup' => $out2,
     );
     $form['synonym'] = array(
-      '#type'   => 'textarea',
+      '#type' => 'textarea',
       '#default_value' => $synonym,
     );
     $form['submit_two'] = array(
       '#type' => 'submit',
       '#value' => t('Save results'),
-	  '#submit' => array('usyn_synonymizer_execute_form_submit_two'),
+      '#submit' => array('usyn_synonymizer_execute_form_submit_two'),
     );
   }
   return $form;  
@@ -276,15 +276,15 @@ function usyn_synonymizer_execute_form_submit_one($form, &$form_state) {
   $t = htmlspecialchars($t);
   $t = str_replace("\n", "<br>", $t);
   $t = str_replace("|||", "|", $t);
-	
+
   db_query('OPTIMIZE TABLE {usynbase}');
 
   $t = usyn_synonymizer_rewrite($t, $stopwords);	
-		
-  $res = $t."|||";
-		
+
+  $res = $t . "|||";
+
   $out1 = '<table id="table1" class="Text3"><tr><td id="out">&nbsp;</td></tr></table>';
-	
+
   $out2 = '<div><table class="Text4" id="select_syn"><tbody class="scrollContent"></tbody></table></div>';
 
   $form_state['storage']['input_text'] = $form_state['values']['input_text'];
@@ -303,114 +303,123 @@ function usyn_synonymizer_rewrite($text, $stopwords) {
   $stopwords = trim($stopwords);
   $stopwords = explode(",", $stopwords);
   $len = count($stopwords);
-  for ($i=0; $i<$len; $i++) {
+  for ($i = 0; $i < $len; $i++) {
     $stopwords[$i] = trim($stopwords[$i]);
   }
 
   $n = 0;
   $count = 0;
   $new_text = "";
-	
+
   $len = strlen($text);
   $w_c = 0;
   $words[$w_c] = "";
-	
-  for ($i=0; $i<$len; $i++) {
-    if ( ($text[$i]==" ") or ($text[$i]==",") or ($text[$i]==".") or
-    ($text[$i]=="!") or ($text[$i]=="?") or ($text[$i]==chr(13)) or
-    ($text[$i]=="(") or ($text[$i]==")") or ($text[$i]==":") or
-    ($text[$i]==";") or ($text[$i]=="«") or ($text[$i]=="»") or
-    ($text[$i]=="-") or ($text[$i]=="=") or ($text[$i]=="'") ) {
+  
+  for ($i = 0; $i < $len; $i++) {
+    // Define incorrect symbols
+    $is_1 = (($text[$i] == " ") || ($text[$i] == ",") || ($text[$i] == "."));
+    $is_2 = (($text[$i] == "!") || ($text[$i] == "?") || ($text[$i] == chr(13)));
+    $is_3 = (($text[$i] == "(") || ($text[$i] == ")") || ($text[$i] == ":"));
+    $is_4 = (($text[$i] == ";") || ($text[$i] == "«") || ($text[$i] == "»"));
+    $is_5 = (($text[$i] == "-") || ($text[$i] == "=") || ($text[$i] == "'"));
+    // Delete incorrect symbols
+    if ($is_1 || $is_2 || $is_3 || $is_4 || $is_5 ) {
       $w_c++;
       $words[$w_c] = $text[$i];
     }
     else {
-      if ($i>0 && (($text[$i-1]==" ") or ($text[$i-1]==",") or ($text[$i-1]==".") or
-      ($text[$i-1]=="!") or ($text[$i-1]=="?") or ($text[$i-1]==chr(13)) or
-      ($text[$i-1]=="(") or ($text[$i-1]==")") or ($text[$i-1]==":") or
-      ($text[$i-1]==";") or ($text[$i-1]=="«") or ($text[$i-1]=="»") or
-      ($text[$i-1]=="-") or ($text[$i-1]=="=") or ($text[$i-1]=="'"))) {
-        $w_c++;
-        $words[$w_c] = "";
+      if ($i > 0) {
+        // Define incorrect symbols
+        $is_6 = (($text[$i - 1] == " ") || ($text[$i - 1] == ",") || ($text[$i - 1] == "."));
+        $is_7 = (($text[$i - 1] == "!") || ($text[$i - 1] == "?") || ($text[$i - 1] == chr(13)));
+        $is_8 = (($text[$i - 1] == "(") || ($text[$i - 1] == ")") || ($text[$i - 1] == ":"));
+        $is_9 = (($text[$i - 1] == ";") || ($text[$i - 1] == "«") || ($text[$i - 1] == "»"));
+        $is_10 = (($text[$i - 1] == "-") || ($text[$i - 1] == "=") || ($text[$i - 1] == "'"));
+		// Delete incorrect symbols
+	    if ($is_6 || $is_7 or $is_8 || $is_9 || $is_10) {
+          $w_c++;
+          $words[$w_c] = "";
+        }
       }
-      $words[$w_c] = $words[$w_c].$text[$i];
+      $words[$w_c] = $words[$w_c] . $text[$i];
     }	
   }
-	
-  for ($i=0; $i<=$w_c; $i++) {
-    if ((strlen($words[$i])>1) &&
-      (!in_array($words[$i], $stopwords)) &&
-      (($words[$i]!=" ") and ($words[$i]!=",") and ($words[$i]!=".") and
-       ($words[$i]!="!") and ($words[$i]!="?") and ($words[$i]!=chr(13)) and
-       ($words[$i]!="(") and ($words[$i]!=")") and ($words[$i]!=":") and
-       ($words[$i]!=";") and ($words[$i]!="«") and ($words[$i]!="»") and
-       ($words[$i]!="-") and ($words[$i]!="=") and ($words[$i]!="'"))) {
-         $res = db_query('SELECT syn FROM {usynbase} WHERE word=:word', array(':word' => $words[$i]))->fetchCol();
+
+  for ($i = 0; $i <= $w_c; $i++) {
+    // Define incorrect symbols  
+    $is_11 = (($words[$i] != " ") && ($words[$i] != ",") && ($words[$i] != "."));
+    $is_12 = (($words[$i] != "!") && ($words[$i] != "?") && ($words[$i] != chr(13)));
+    $is_13 = (($words[$i] != "(") && ($words[$i] != ")") && ($words[$i] != ":"));
+    $is_14 = (($words[$i] != ";") && ($words[$i] != "«") && ($words[$i] != "»"));
+    $is_15 = (($words[$i] != "-") && ($words[$i] != "=") && ($words[$i] != "'"));
+    // Delete incorrect symbols, stopwords and find synonyms in database
+    if ((strlen($words[$i])>1) && (!in_array($words[$i], $stopwords)) && ($is_11 && $is_12 && $is_13 && $is_14 && $is_15)) {
+      $res = db_query('SELECT syn FROM {usynbase} WHERE word=:word', array(':word' => $words[$i]))->fetchCol();
       $rows = db_query('SELECT syn FROM {usynbase} WHERE word=:word', array(':word' => $words[$i]))->rowCount();
       if ($rows > 0) {	
         $n++;
         $count++;
-        $dop[$n] = $n."|".$words[$i]."|"."0"."|";			
-				
-        $BigChar = false;
-        $BigStr = false;
+        $dop[$n] = $n . "|" . $words[$i] . "|" . "0" . "|";			
+
+        $bigchar = FALSE;
+        $bigstr = FALSE;
         if ($words[$i] == strtoupper($words[$i])) {
-          $BigStr = true;
+          $bigstr = TRUE;
         }
         else {
           if ($words[$i][0] == strtoupper($words[$i][0])) {
-            $BigChar = true;
+            $bigchar = TRUE;
           }
         }
-			
+
         $row[0] = trim($res[0]);
         $ss = explode("|", $row[0]);
-				
+
         unset($syn_a);
         $id = -1;
-				
+
         $ss_c = count($ss);
-        for ($j=1; $j<$ss_c+1; $j+=2) {	
+        for ($j = 1; $j < $ss_c + 1; $j += 2) {	
           $id++;
-          $syn_a[$id] = $ss[$j-1];
-          if ($BigChar) {
+          $syn_a[$id] = $ss[$j - 1];
+          if ($bigchar) {
             $syn_a[$id][0] = strtoupper($syn_a[$id][0]);
           }
-          if ($BigStr) {
+          if ($bigstr) {
             $syn_a[$id] = strtoupper($syn_a[$id]);				
           }
-          
-		  $syn_b[$id] = $ss[$j];
+
+          $syn_b[$id] = $ss[$j];
         }		  
-				
+
         if ($syn_b[0] > 0) {
           $syn = $syn_a[0];
         }
         else {
           $syn = $syn_a[array_rand($syn_a)];		
         }
-			  
-        $words[$i] = "<a id='".$n."' class='zam'>".$syn."</a>";
-			
-        for ($j=0; $j<=$id; $j++) {
+
+        $words[$i] = "<a id='" . $n . "' class='zam'>" . $syn . "</a>";
+
+        for ($j = 0; $j <= $id; $j++) {
           $count++;
-          if ($syn_a[$j]==$syn) {
-            $dop[$n] = $dop[$n].$n."|".$syn_a[$j]."|1|";
+          if ($syn_a[$j] == $syn) {
+            $dop[$n] = $dop[$n] . $n . "|" . $syn_a[$j] . "|1|";
           }
           else {
-            $dop[$n] = $dop[$n].$n."|".$syn_a[$j]."|0|";
+            $dop[$n] = $dop[$n] . $n . "|" . $syn_a[$j] . "|0|";
           }
         }
       }
     }
   }
-		
+
     $new_text = implode($words);
 
     if ($count == 0) {
       $dop[0] = "_|";
     }
-    $new_text = $count."|||".implode($dop)."||".$new_text;
+    $new_text = $count . "|||" . implode($dop) . "||" . $new_text;
     return $new_text;
 }
 
@@ -419,7 +428,7 @@ function usyn_synonymizer_rewrite($text, $stopwords) {
  **/
 function usyn_synonymizer_execute_form_submit_two($form, &$form_state) {
   $nid = arg(1);
-  $path = 'node/'. $nid .'/edit';
+  $path = 'node/' . $nid . '/edit';
   $node = node_load($nid);
   $val = $form_state['values']['input_text'];
   $node->body[LANGUAGE_NONE][0]['value'] = $val;
