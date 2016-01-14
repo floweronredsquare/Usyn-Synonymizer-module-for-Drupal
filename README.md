@@ -12,16 +12,16 @@ Allows to make unique your content by substitution of synonyms.
 
 1. Put the catalog usyn_synonymizer into /sites/all/modules of the root of your site.
 
-2. Turn on the module on the page http://<your_site>/admin/modules.
+2. Turn on the module on the page http://example.com/admin/modules.
 
 
 ### Upload of new synonyms base
 
 If you work with Usyn Synonymizer the first time you need to upload a base of synonyms in CSV format. The examples of english and russin bases of synonyms you can find in usyn_synonymizer/bases.
 
-1. If the base of synonyms already exists in your system, you need to clean it on the page http://<your_site>/clean-db
+1. If the base of synonyms already exists in your system, you need to clean it on the page http://example.com/clean-db
 
-2. You can upload a new base of synonyms on the page http://<your_site>/admin/config/usyn_synonymizer/settings
+2. You can upload a new base of synonyms on the page http://example.com/admin/config/usyn_synonymizer/settings
 
 3. You need click the "Import" button on the next page after uploading CSV file.
 
@@ -49,16 +49,16 @@ If you work with Usyn Synonymizer the first time you need to upload a base of sy
 
 1. Положить папку usyn_synonymizer в каталог /sites/all/modules сайта.
 
-2. Включить модуль на странице http://<your_site>/admin/modules.
+2. Включить модуль на странице http://example.com/admin/modules.
 
 
 ### Загрузка новой базы синонимов
 
 Если вы работаете с синонимайзером в первый раз, то необходимо загрузить базу синонимов в формате csv. Примеры английской и русской базы синонимов вы можете найти в каталоге usyn_synonymizer/bases.
 
-1. Если база синонимов уже ранее была загружена, то необходимо очистить ее на странице http://<your_site>/clean-db
+1. Если база синонимов уже ранее была загружена, то необходимо очистить ее на странице http://example.com/clean-db
 
-2. Загрузить новую базу синонимов можно на странице http://<your_site>/admin/config/usyn_synonymizer/settings
+2. Загрузить новую базу синонимов можно на странице http://example.com/admin/config/usyn_synonymizer/settings
 
 3. После загрузки CSV файла вам потребуется осуществить импорт базы в систему. Для этого нажмите кнопку "Import" на странице, на которую вы попадете после загрузки файла с базой синонимов.
 
